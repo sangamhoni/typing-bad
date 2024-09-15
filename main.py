@@ -1,6 +1,17 @@
 import curses
 from curses import wrapper
+import math
 import time
+import random
+import json
+
+quotes = [
+    "Who are you talking to right now? Who is it you think you see? Do you know how much I make a year? I mean, even if I told you, you wouldn’t believe it. Do you know what would happen if I suddenly decided to stop going into work?",
+    "No, you clearly don’t know who you’re talking to, so let me clue you in. I am not in danger, Skyler. I am the danger.",
+    "A guy opens his door and gets shot and you think that of me? No. I am the one who knocks!"
+]
+
+global TERMINAL_HEIGHT, TERMINAL_WIDTH
 
 def start_screen(stdscr):
     stdscr.clear()
@@ -24,10 +35,14 @@ def typing_accuracy(current_text, target_text):
     matching_percentage = (matching_characters / total_characters) * 100
     return matching_percentage
 
+
 def display_text(stdscr, target, current, wpm=0, accuracy=100):
+    global WPM_YCOR
+    WPM_YCOR=max(math.ceil(len(target)/TERMINAL_WIDTH), 1) + 3
+    
     stdscr.addstr(1, 0, target, curses.color_pair(3))
-    stdscr.addstr(4, 0, f"WPM: {wpm}", curses.color_pair(4))
-    stdscr.addstr(f"\t\tAccuracy: {accuracy}%", curses.color_pair(4))
+    stdscr.addstr(WPM_YCOR, 0, f"WPM: {wpm}", curses.color_pair(4))
+    stdscr.addstr(f"     Accuracy: {accuracy}%", curses.color_pair(4))
     stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
     
     for i, char in enumerate(current):
@@ -36,11 +51,13 @@ def display_text(stdscr, target, current, wpm=0, accuracy=100):
         if char != correct_char:
             color=curses.color_pair(2)
         
-        stdscr.addstr(1, i, char, color)
+        xcor=(i%TERMINAL_WIDTH) # here i is the index of the character
+        ycor=max(math.ceil((i+1)/TERMINAL_WIDTH), 1)
+        stdscr.addstr(ycor, xcor, char, color)
 
 
 def wpm_test(stdscr):
-    target_text="Hello world this is some test text for this app!"
+    target_text=random.choice(quotes)
     current_text=[]
     wpm=0
     start_time=time.time()
@@ -93,11 +110,8 @@ def wpm_test(stdscr):
         if key in ("KEY_BACKSPACE", '\b', "\x7f"): # different representation of backspaces in different OS
             if len(current_text)>0:
                 current_text.pop()
-
         elif len(current_text)<len(target_text):
             current_text.append(key)
-
-        # 13 for space
 
 
 def main(stdscr): # stdscr == stand screen
@@ -110,9 +124,14 @@ def main(stdscr): # stdscr == stand screen
         curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Fallback to whited
     curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
+    # getting terminal height and width for positioning
+    global TERMINAL_HEIGHT, TERMINAL_WIDTH
+    TERMINAL_HEIGHT, TERMINAL_WIDTH=stdscr.getmaxyx()
+
     start_screen(stdscr)
     wpm_test(stdscr)
-    stdscr.addstr(5, 0, "Test complete. Hit enter to give another try. ")
+    
+    stdscr.addstr(WPM_YCOR+1, 0, "Test complete. Hit enter to give another try. ")
     
     while True:
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
@@ -121,5 +140,6 @@ def main(stdscr): # stdscr == stand screen
             wrapper(main)
         elif key=="N" or key=="n" or ord(key)==27:
             break  
+
 
 wrapper(main) 
