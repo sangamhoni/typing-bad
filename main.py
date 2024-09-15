@@ -13,7 +13,7 @@ def start_screen(stdscr):
 
 def display_text(stdscr, target, current, wpm=0):
     stdscr.addstr(1, 0, target, curses.color_pair(3))
-    stdscr.addstr(4, 0, f"WPM: {wpm}")
+    stdscr.addstr(4, 0, f"WPM: {wpm}", curses.color_pair(4))
     stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
     
     for i, char in enumerate(current):
@@ -39,6 +39,10 @@ def wpm_test(stdscr):
         stdscr.clear()
         display_text(stdscr, target_text, current_text, wpm)
         stdscr.refresh()
+        
+        # detect the end of line
+        if len(current_text)==len(target_text):
+            break
         
         # converting to a string for comparison 
         if ("".join(current_text)==target_text):
@@ -72,15 +76,16 @@ def main(stdscr): # stdscr == stand screen
         curses.init_pair(3, 8, curses.COLOR_BLACK)  # Dark grey (color 8)
     else:
         curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Fallback to whited
+    curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
     start_screen(stdscr)
     while True:
         wpm_test(stdscr)
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
-        stdscr.addstr(5, 0, "Test complete")
+        stdscr.addstr(5, 0, "Test complete. Hit enter to give another try. ")
         key = stdscr.getkey()
         
-        if ord(key)==27:
+        if key not in ("KEY_ENTER", '\n', '\r'):
             break   
 
 wrapper(main) 
