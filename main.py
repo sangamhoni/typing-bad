@@ -2,16 +2,21 @@ import curses
 from curses import wrapper
 import math
 import time
-import random
 import json
+import random
 
-quotes = [
-    "Who are you talking to right now? Who is it you think you see? Do you know how much I make a year? I mean, even if I told you, you wouldn’t believe it. Do you know what would happen if I suddenly decided to stop going into work?",
-    "No, you clearly don’t know who you’re talking to, so let me clue you in. I am not in danger, Skyler. I am the danger.",
-    "A guy opens his door and gets shot and you think that of me? No. I am the one who knocks!"
-]
+# quotes = [
+#     "Who are you talking to right now? Who is it you think you see? Do you know how much I make a year? I mean, even if I told you, you wouldn’t believe it. Do you know what would happen if I suddenly decided to stop going into work?",
+#     "No, you clearly don’t know who you’re talking to, so let me clue you in. I am not in danger, Skyler. I am the danger.",
+#     "A guy opens his door and gets shot and you think that of me? No. I am the one who knocks!"
+# ]
 
 global TERMINAL_HEIGHT, TERMINAL_WIDTH
+
+# Load the quotes from the JSON file
+
+with open('quotes.json', 'r') as file:
+    quotes = json.load(file)
 
 def start_screen(stdscr):
     stdscr.clear()
@@ -36,11 +41,12 @@ def typing_accuracy(current_text, target_text):
     return matching_percentage
 
 
-def display_text(stdscr, target, current, wpm=0, accuracy=100):
+def display_text(stdscr, target, target_author, current, wpm=0, accuracy=100):
     global WPM_YCOR
     WPM_YCOR=max(math.ceil(len(target)/TERMINAL_WIDTH), 1) + 3
     
     stdscr.addstr(1, 0, target, curses.color_pair(3))
+    stdscr.addstr(WPM_YCOR-2, 5, f"— {target_author}")
     stdscr.addstr(WPM_YCOR, 0, f"WPM: {wpm}", curses.color_pair(4))
     stdscr.addstr(f"     Accuracy: {accuracy}%", curses.color_pair(4))
     stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
@@ -57,7 +63,11 @@ def display_text(stdscr, target, current, wpm=0, accuracy=100):
 
 
 def wpm_test(stdscr):
-    target_text=random.choice(quotes)
+    # select random quote from json file loaded into quotes
+    quote_json=random.choice(quotes)
+    target_text=quote_json['quote']
+    target_text_author=quote_json['character']
+    
     current_text=[]
     wpm=0
     start_time=time.time()
@@ -83,7 +93,7 @@ def wpm_test(stdscr):
             accuracy_score = round((matching_characters / total_characters) * 100)
         
         stdscr.clear()
-        display_text(stdscr, target_text, current_text, wpm, accuracy_score)
+        display_text(stdscr, target_text, target_text_author, current_text, wpm, accuracy_score)
         stdscr.refresh()
         
         # detect the end of line
