@@ -11,9 +11,23 @@ def start_screen(stdscr):
     stdscr.getkey() # waiting to press a key by the user
 
 
-def display_text(stdscr, target, current, wpm=0):
+def typing_accuracy(current_text, target_text):
+    total_characters = min(len(current_text), len(target_text))
+    if total_characters == 0:
+        return 0.0  # If there are no characters, consider accuracy as 100%
+
+    matching_characters = 0
+    for current_char, target_char in zip(current_text, target_text):
+        if current_char == target_char:
+            matching_characters += 1
+    
+    matching_percentage = (matching_characters / total_characters) * 100
+    return matching_percentage
+
+def display_text(stdscr, target, current, wpm=0, accuracy=100):
     stdscr.addstr(1, 0, target, curses.color_pair(3))
     stdscr.addstr(4, 0, f"WPM: {wpm}", curses.color_pair(4))
+    stdscr.addstr(f"\t\tAccuracy: {accuracy}%", curses.color_pair(4))
     stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
     
     for i, char in enumerate(current):
@@ -33,11 +47,26 @@ def wpm_test(stdscr):
     stdscr.nodelay(True) # makes sure the wpm doesnt get stuck when user doesnt type anything
 
     while True:
+        if current_text == []:
+            start_time = time.time()
         time_elapsed=max(time.time() - start_time, 1)
+        
+        # calculates WPM
         wpm = round((len(current_text) / (time_elapsed/60)) / 5) # this assumes the avg word has 5 characters
         
+        # calculates Accuracy
+        total_characters = min(len(current_text), len(target_text))
+        if (total_characters==0):
+            accuracy_score=100
+        else:
+            matching_characters = 0
+            for current_char, target_char in zip(current_text, target_text):
+                if current_char == target_char:
+                    matching_characters += 1
+            accuracy_score = round((matching_characters / total_characters) * 100)
+        
         stdscr.clear()
-        display_text(stdscr, target_text, current_text, wpm)
+        display_text(stdscr, target_text, current_text, wpm, accuracy_score)
         stdscr.refresh()
         
         # detect the end of line
@@ -54,6 +83,9 @@ def wpm_test(stdscr):
             key=stdscr.getkey()
         except:
             continue
+            
+        if current_text == []:
+            start_time = time.time()
         
         if ord(key)==27 or key in ("KEY_ENTER", '\n', '\r'): #ascii for escape key or the enter key
             break
@@ -79,13 +111,15 @@ def main(stdscr): # stdscr == stand screen
     curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
     start_screen(stdscr)
+    wpm_test(stdscr)
+    stdscr.addstr(5, 0, "Test complete. Hit enter to give another try. ")
+    
     while True:
-        wpm_test(stdscr)
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
-        stdscr.addstr(5, 0, "Test complete. Hit enter to give another try. ")
         key = stdscr.getkey()
-        
-        if key not in ("KEY_ENTER", '\n', '\r'):
-            break   
+        if key in ("KEY_ENTER", '\n', '\r', 'y', 'Y'):
+            wrapper(main)
+        elif key=="N" or key=="n" or ord(key)==27:
+            break  
 
 wrapper(main) 
