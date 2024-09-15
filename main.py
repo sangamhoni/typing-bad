@@ -11,11 +11,29 @@ def start_screen(stdscr):
 
 def wpm_test(stdscr):
     target_text="Hello world this is some test text for this app!"
-    current_text=""
-    stdscr.clear()
-    stdscr.addstr(1, 1, target_text)
-    stdscr.refresh()
-    stdscr.getkey()
+    current_text=[]
+
+    
+    while True:
+        stdscr.clear()
+        stdscr.addstr(target_text)
+
+        for char in current_text:
+            stdscr.addstr(char, curses.color_pair(1))
+        
+        stdscr.refresh()
+        
+        key=stdscr.getkey()
+        
+        if ord(key)==27: #ascii for Return key
+            break
+        if key in ("KEY_BACKSPACE", '\b', "\x7f"): # different representation of backspaces in different OS
+            if len(current_text)>0:
+                current_text.pop()
+        else:
+            current_text.append(key)
+
+
 
 def main(stdscr): # stdscr == stand screen
     # creating color pair
