@@ -6,15 +6,15 @@ def start_screen(stdscr):
     stdscr.clear()
     stdscr.addstr(1, 0, "TYPING BAD: BREAKING LIMITS")
     stdscr.addstr("\nTime to cook… some serious WPM. Type fast and prove you’re the one who types!")
-    stdscr.addstr("\n\nPress any key to continue..")
+    stdscr.addstr("\n\nPress any key to continue… ")
     stdscr.refresh()
     stdscr.getkey() # waiting to press a key by the user
 
 
 def display_text(stdscr, target, current, wpm=0):
-    stdscr.addstr(0, 0, target)
-    stdscr.addstr(3, 0, f"WPM: {wpm}")
-    stdscr.addstr(0, 0, "") # to keep the cursor in the beginnig of the line before typing
+    stdscr.addstr(1, 0, target, curses.color_pair(3))
+    stdscr.addstr(4, 0, f"WPM: {wpm}")
+    stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
     
     for i, char in enumerate(current):
         correct_char=target[i]
@@ -22,7 +22,7 @@ def display_text(stdscr, target, current, wpm=0):
         if char != correct_char:
             color=curses.color_pair(2)
         
-        stdscr.addstr(0, i, char, color)
+        stdscr.addstr(1, i, char, color)
 
 
 def wpm_test(stdscr):
@@ -39,7 +39,7 @@ def wpm_test(stdscr):
         stdscr.clear()
         display_text(stdscr, target_text, current_text, wpm)
         stdscr.refresh()
-
+        
         # converting to a string for comparison 
         if ("".join(current_text)==target_text):
             stdscr.nodelay(False) #now pause the live wpm update
@@ -68,19 +68,19 @@ def main(stdscr): # stdscr == stand screen
     # creating color pair
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    if curses.can_change_color() and curses.COLORS >= 256:
+        curses.init_pair(3, 8, curses.COLOR_BLACK)  # Dark grey (color 8)
+    else:
+        curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Fallback to whited
 
     start_screen(stdscr)
     while True:
         wpm_test(stdscr)
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
-        stdscr.addstr(4, 0, "Test complete")
+        stdscr.addstr(5, 0, "Test complete")
         key = stdscr.getkey()
         
         if ord(key)==27:
             break   
 
-
-
 wrapper(main) 
-    
