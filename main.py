@@ -1,5 +1,6 @@
 import curses
 from curses import wrapper
+import time
 
 def start_screen(stdscr):
     stdscr.clear()
@@ -27,13 +28,22 @@ def wpm_test(stdscr):
     target_text="Hello world this is some test text for this app!"
     current_text=[]
     wpm=0
+    start_time=time.time()
+    stdscr.nodelay(True) # makes sure the wpm doesnt get stuck when user doesnt type anything
 
     while True:
+        time_elapsed=max(time.time() - start_time, 1)
+        wpm = round((len(current_text) / (time_elapsed/60)) / 5) # this assumes the avg word has 5 characters
+        
         stdscr.clear()
         display_text(stdscr, target_text, current_text, wpm)
         stdscr.refresh()
         
-        key=stdscr.getkey()
+        # to make sure we dont get error because of stdscr.nodelay(True)
+        try: 
+            key=stdscr.getkey()
+        except:
+            continue
         
         if ord(key)==27: #ascii for Return key
             break
