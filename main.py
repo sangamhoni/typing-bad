@@ -12,8 +12,9 @@ def start_screen(stdscr):
 
 
 def display_text(stdscr, target, current, wpm=0):
-    stdscr.addstr(2, 0, f"WPM: {wpm}")
     stdscr.addstr(0, 0, target)
+    stdscr.addstr(3, 0, f"WPM: {wpm}")
+    stdscr.addstr(0, 0, "") # to keep the cursor in the beginnig of the line before typing
     
     for i, char in enumerate(current):
         correct_char=target[i]
@@ -38,6 +39,11 @@ def wpm_test(stdscr):
         stdscr.clear()
         display_text(stdscr, target_text, current_text, wpm)
         stdscr.refresh()
+
+        # converting to a string for comparison 
+        if ("".join(current_text)==target_text):
+            stdscr.nodelay(False) #now pause the live wpm update
+            break
         
         # to make sure we dont get error because of stdscr.nodelay(True)
         try: 
@@ -45,14 +51,17 @@ def wpm_test(stdscr):
         except:
             continue
         
-        if ord(key)==27: #ascii for Return key
+        if ord(key)==27 or key in ("KEY_ENTER", '\n', '\r'): #ascii for escape key or the enter key
             break
+        
         if key in ("KEY_BACKSPACE", '\b', "\x7f"): # different representation of backspaces in different OS
             if len(current_text)>0:
                 current_text.pop()
+
         elif len(current_text)<len(target_text):
             current_text.append(key)
 
+        # 13 for space
 
 
 def main(stdscr): # stdscr == stand screen
@@ -62,10 +71,14 @@ def main(stdscr): # stdscr == stand screen
     curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
 
     start_screen(stdscr)
-    wpm_test(stdscr)
-    
-    
-
+    while True:
+        wpm_test(stdscr)
+        stdscr.nodelay(False) # to wait for user's input after exitting with esc key
+        stdscr.addstr(4, 0, "Test complete")
+        key = stdscr.getkey()
+        
+        if ord(key)==27:
+            break   
 
 
 
