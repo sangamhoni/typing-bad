@@ -13,10 +13,23 @@ import random
 
 global TERMINAL_HEIGHT, TERMINAL_WIDTH
 
-# Load the quotes from the JSON file
+# List of special keys to ignore
+special_keys = [
+    "KEY_BACKSPACE", "KEY_TAB", "KEY_LEFT", "KEY_RIGHT", "KEY_UP", "KEY_DOWN",
+    "KEY_HOME", "KEY_END", "KEY_PPAGE", "KEY_NPAGE", "KEY_IC", "KEY_DC",
+    "KEY_ENTER", "KEY_BTAB", "KEY_SLEFT", "KEY_SRIGHT", "KEY_SR", "KEY_SF",
+    "KEY_SHOME", "KEY_SEND", "KEY_SDC", "KEY_SNEXT", "KEY_SPREVIOUS",
+    "KEY_F1", "KEY_F2", "KEY_F3", "KEY_F4", "KEY_F5", "KEY_F6", "KEY_F7",
+    "KEY_F8", "KEY_F9", "KEY_F10", "KEY_F11", "KEY_F12", "KEY_RESIZE",
+    "SHF_PADENTER", "PADENTER", "KEY_TAB", "KEY_BTAB"  # Ignore shift-enter if necessary
+]
 
-with open('quotes.json', 'r') as file:
+# Load the quotes from the JSON file
+with open('./assets/quotes.json', 'r') as file:
     quotes = json.load(file)
+with open('./assets/end_messages.json', 'r') as file:
+    end_msg = json.load(file)
+
 
 def start_screen(stdscr):
     stdscr.clear()
@@ -25,6 +38,22 @@ def start_screen(stdscr):
     stdscr.addstr("\n\nPress any key to continue… ")
     stdscr.refresh()
     stdscr.getkey() # waiting to press a key by the user
+
+
+def get_performance_msg(wpm, accuracy):
+    level=""
+    if wpm>=80 and accuracy == 100:
+        level = "perfect"
+    if wpm >= 70 and accuracy>=90:
+        level = "excellent"
+    elif wpm >= 50 and accuracy>=80:
+        level = "good"
+    elif wpm >= 40 and accuracy>=60:
+        level = "average"
+    else:
+        level = "below_average"
+    messages=end_msg[level]
+    return random.choice(messages)
 
 
 def typing_accuracy(current_text, target_text):
@@ -43,10 +72,10 @@ def typing_accuracy(current_text, target_text):
 
 def display_text(stdscr, target, target_author, current, wpm=0, accuracy=100):
     global WPM_YCOR
-    WPM_YCOR=max(math.ceil(len(target)/TERMINAL_WIDTH), 1) + 3
+    WPM_YCOR=max(math.ceil(len(target)/TERMINAL_WIDTH), 1) + 4
     
     stdscr.addstr(1, 0, target, curses.color_pair(3))
-    stdscr.addstr(WPM_YCOR-2, 5, f"— {target_author}")
+    stdscr.addstr(WPM_YCOR-3, 5, f"— {target_author}")
     stdscr.addstr(WPM_YCOR, 0, f"WPM: {wpm}", curses.color_pair(4))
     stdscr.addstr(f"     Accuracy: {accuracy}%", curses.color_pair(4))
     stdscr.addstr(1, 0, "") # to keep the cursor in the beginnig of the line before typing
@@ -98,12 +127,12 @@ def wpm_test(stdscr):
         
         # detect the end of line
         if len(current_text)==len(target_text):
-            break
+            return wpm, accuracy_score
         
         # converting to a string for comparison 
         if ("".join(current_text)==target_text):
             stdscr.nodelay(False) #now pause the live wpm update
-            break
+            return wpm, accuracy_score
         
         # to make sure we dont get error because of stdscr.nodelay(True)
         try: 
@@ -114,9 +143,26 @@ def wpm_test(stdscr):
         if current_text == []:
             start_time = time.time()
         
-        if ord(key)==27 or key in ("KEY_ENTER", '\n', '\r'): #ascii for escape key or the enter key
-            break
+        # Prevent adding null characters (embedded null character error)
+        if len(key) > 1 or '\0' in key or key in special_keys: # Check if the key is a null character; ignores special keys
+            if key not in ("'", '"'):
+                continue
         
+        # Exit condition (Escape key or Enter key)
+        if ord(key)==27 or key in ("KEY_ENTER", '\n', '\r'): #ascii for escape key or the enter key
+            return wpm, accuracy_score
+        
+        # to handle Tab key
+        if key == '\t' or key.startswith('\x1b[Z'):  # Check if the key is a tab character
+            continue
+        
+        # To make sure quotes and double quotes are working
+        if key == "'":
+            key="'"
+        elif key == '"':
+            key='"'
+        
+        # Handle Backspace
         if key in ("KEY_BACKSPACE", '\b', "\x7f"): # different representation of backspaces in different OS
             if len(current_text)>0:
                 current_text.pop()
@@ -139,17 +185,20 @@ def main(stdscr): # stdscr == stand screen
     TERMINAL_HEIGHT, TERMINAL_WIDTH=stdscr.getmaxyx()
 
     start_screen(stdscr)
-    wpm_test(stdscr)
+    wpm, accuracy = wpm_test(stdscr)
     
-    stdscr.addstr(WPM_YCOR+1, 0, "Test complete. Hit enter to give another try. ")
+    stdscr.addstr(WPM_YCOR+2, 0, get_performance_msg(wpm, accuracy))
     
     while True:
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
         key = stdscr.getkey()
-        if key in ("KEY_ENTER", '\n', '\r', 'y', 'Y'):
+        if len(key) == 1 and key in ("KEY_ENTER", '\n', '\r', 'y', 'Y'):
             wrapper(main)
-        elif key=="N" or key=="n" or ord(key)==27:
-            break  
+        elif len(key) == 1: # make sure no special keys are pressed 
+            if key=="N" or key=="n" or ord(key)==27:
+                exit() # break isn't working for some reason
+        else:
+            continue
 
 
 wrapper(main) 
