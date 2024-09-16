@@ -1,5 +1,5 @@
 # Typing Bad!
-Welcome to **Typing Bad**. Immerse yourself in the world of [Breaking Bad](https://www.imdb.com/title/tt0903747/) and test your typing skills with iconic quotes from the series.  
+Welcome to **Typing Bad**. Immerse yourself in the world of [Breaking Bad](https://www.imdb.com/title/tt0903747/) and test your typing skills with iconic quotes from the series. This game is built with Python and [Curses](https://docs.python.org/3/library/curses.html), ensuring a seamless and polished terminal-based experience.
 
 &nbsp;  
 
@@ -66,5 +66,3 @@ Contributions of any kind are welcome and appreciated :)
 
 ## Copyright Note  
 All quotes used in this project are copyrighted by the respective owners of [Breaking Bad](https://www.imdb.com/title/tt0903747/). No claims of ownership are made over these quotes.  
-
----
