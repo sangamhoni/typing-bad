@@ -1,0 +1,48 @@
+{
+    "perfect": [
+        "You've just cooked up a perfect score!",
+        "Breaking Bad? More like Breaking Records!",
+        "Breaking Bad? More like Breaking Typing Records!",
+        "A perfect score. You've cooked up excellence!",
+        "You're the Walter White of typing—masterful and precise!",  
+        "You've reached the pinnacle of typing, as flawless as Heisenberg's empire!"
+    ],
+    "excellent": [
+        "You've got the touch of Heisenberg! Top score!",
+        "Well done, Walter White would be impressed!",
+        "You've mastered the art of typing. Pure brilliance!",
+        "You're the Walter White of typing. Impressive!",
+        "Your typing skills are on a whole new level. Fantastic!",
+        "You're in the Heisenberg's league of typing!",
+        "Close to perfect. Skyler would be impressed!",
+        "You're a typing kingpin. Brilliant work!"
+    ],
+    "good": [
+        "You're in the right direction. Almost at the top of the cartel!",
+        "You're nearly in Heisenberg's league!",
+        "You've got skills! Just a bit more to go!",
+        "Solid performance, but you can always cook better!",
+        "You're almost a typing kingpin. Great job!",
+        "Skyler would be impressed, but there's more to cook!",
+        "Almost there. Keep improving and you'll break bad!"
+    ],
+    "average": [
+        "Good work, but there's room for a little more danger!",
+        "Not bad, but you're no Heisenberg yet!",
+        "You're getting there. Time to cook up some improvements!",
+        "You've got the basics. Now cook up some improvement!",
+        "Good work, but aim for the Heisenberg of typing!",
+        "A bit more practice and you'll be cooking with gas!",
+        "Keep working on it. The cartel awaits your top-notch typing!"
+    ],
+    "below_average": [
+        "Not quite the kingpin yet. Time to get serious!",
+        "You've got some work to do. Let's get cooking!",
+        "You're not quite breaking bad. Try again!",
+        "Time to cook up some better typing skills!",
+        "Not quite the kingpin yet. Time to level up!",
+        "More practice needed to reach Heisenberg's level of precision!",
+        "You're not breaking bad just yet. Try harder!",
+        "You've got potential. Let's see some improvements!"
+    ]
+}
