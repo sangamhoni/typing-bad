@@ -188,6 +188,7 @@ def main(stdscr): # stdscr == stand screen
     wpm, accuracy = wpm_test(stdscr)
     
     stdscr.addstr(WPM_YCOR+2, 0, get_performance_msg(wpm, accuracy))
+    stdscr.addstr(WPM_YCOR+4, 0, "Wanna cook another round? (y/n) ")
     
     while True:
         stdscr.nodelay(False) # to wait for user's input after exitting with esc key
