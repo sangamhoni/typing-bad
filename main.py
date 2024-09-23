@@ -44,7 +44,7 @@ def get_performance_msg(wpm, accuracy):
     level=""
     if wpm>=80 and accuracy == 100:
         level = "perfect"
-    if wpm >= 70 and accuracy>=90:
+    elif wpm >= 70 and accuracy>=90:
         level = "excellent"
     elif wpm >= 50 and accuracy>=80:
         level = "good"
